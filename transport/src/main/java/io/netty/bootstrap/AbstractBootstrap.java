@@ -103,6 +103,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         if (channelClass == null) {
             throw new NullPointerException("channelClass");
         }
+        //指定ReflectiveChannelFactory-->clazz.getConstructor().newInstance()-->返回channel(NioSocketChannel)
         return channelFactory(new ReflectiveChannelFactory<C>(channelClass));
     }
 
@@ -317,6 +318,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
+            //todo 实例化channel
             channel = channelFactory.newChannel();
             init(channel);
         } catch (Throwable t) {

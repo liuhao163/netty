@@ -77,6 +77,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
      * Create a new instance
      */
     public NioSocketChannel() {
+        //todo 调用默认的构造方法，用java nio的SelectorProvider.provider()实例化
         this(DEFAULT_SELECTOR_PROVIDER);
     }
 
@@ -101,6 +102,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
      * @param socket    the {@link SocketChannel} which will be used
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
+        //调用父类的
         super(parent, socket);
         config = new NioSocketChannelConfig(this, socket.socket());
     }
