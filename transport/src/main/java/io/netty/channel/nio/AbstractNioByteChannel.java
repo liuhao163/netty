@@ -63,7 +63,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
      * @param ch                the underlying {@link SelectableChannel} on which it operates
      */
     protected AbstractNioByteChannel(Channel parent, SelectableChannel ch) {
-        //todo call AbstractNioChannel
+        //todo call AbstractNioChannel(null,SocketChannel,OP_READ)
         super(parent, ch, SelectionKey.OP_READ);
     }
 

@@ -82,6 +82,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
         this(nThreads, executor, selectorProvider, DefaultSelectStrategyFactory.INSTANCE);
     }
 
+    //todo (0,null,SelectorProvider.provider(),DefaultSelectStrategyFactory.INSTANCE)
     public NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,
                              final SelectStrategyFactory selectStrategyFactory) {
         super(nThreads, executor, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());

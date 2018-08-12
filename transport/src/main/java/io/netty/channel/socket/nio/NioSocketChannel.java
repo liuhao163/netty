@@ -102,9 +102,9 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
      * @param socket    the {@link SocketChannel} which will be used
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
-        //调用父类的
+        //todo 调用父类的AbstractNioByteChannel，parent为null
         super(parent, socket);
-        config = new NioSocketChannelConfig(this, socket.socket());
+        config = new NioSocketChannelConfig(this, socket.socket());//todo NioSocketChannelConfig
     }
 
     @Override

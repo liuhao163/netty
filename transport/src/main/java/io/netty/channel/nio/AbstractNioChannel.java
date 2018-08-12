@@ -83,10 +83,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         //todo call AbstractChannel consutrct to init Channel's props
         super(parent);
-        this.ch = ch;
-        this.readInterestOp = readInterestOp;
+        this.ch = ch; //socketchannel
+        this.readInterestOp = readInterestOp; //READ_OPS
         try {
-            ch.configureBlocking(false);
+            ch.configureBlocking(false);//set non-blocking
         } catch (IOException e) {
             try {
                 ch.close();

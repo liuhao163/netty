@@ -82,7 +82,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         this.parent = parent; //default null
         id = newId();//init id
         unsafe = newUnsafe(); //todo 初始化unsafe，调用子类实现unsafe这里是  AbstractNioByteChannel.NioByteUnsafe内部类。unsafe是java.nio操作的封装
-        pipeline = newChannelPipeline();
+        pipeline = newChannelPipeline();//todo 初始化pipline，DefaultChannelPipeline
     }
 
     /**

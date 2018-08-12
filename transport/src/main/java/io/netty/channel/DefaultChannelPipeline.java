@@ -97,6 +97,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         tail = new TailContext(this);
         head = new HeadContext(this);
 
+        //todo 双向链表 做什么用的
         head.next = tail;
         tail.prev = head;
     }
@@ -1266,7 +1267,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     // A special catch-all handler that handles both bytes and messages.
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
-
+        //todo ?????? mark inbound outbound 什麼意思
         TailContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, TAIL_NAME, true, false);
             setAddComplete();

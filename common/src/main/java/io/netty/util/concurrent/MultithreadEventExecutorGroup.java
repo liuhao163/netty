@@ -68,14 +68,18 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      */
     protected MultithreadEventExecutorGroup(int nThreads, Executor executor,
                                             EventExecutorChooserFactory chooserFactory, Object... args) {
+        //todo nThreads=cpu*2,executor=null,chooserFactory=DefaultEventExecutorChooserFactory.INSTANCE,
+        //todo args0=selectProvder,args1=DefaultSelectStrategyFactory.INSTANCE,args2=RejectedExecutionHandlers.reject()
         if (nThreads <= 0) {
             throw new IllegalArgumentException(String.format("nThreads: %d (expected: > 0)", nThreads));
         }
 
+        //todo executor=new ThreadPerTaskExecutor(newDefaultThreadFactory());
         if (executor == null) {
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
         }
 
+        //todo 关键代码，实际上为了一个EventExecutor数组长度数nThreads，并且循环call newChild初始化数组,newChild是一个抽象方法这里是NioEventLoop
         children = new EventExecutor[nThreads];
 
         for (int i = 0; i < nThreads; i ++) {
