@@ -79,7 +79,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioByteUnsafe();
-    }
+}
 
     @Override
     public ChannelMetadata metadata() {

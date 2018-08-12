@@ -457,6 +457,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
+            //todo check
             if (eventLoop == null) {
                 throw new NullPointerException("eventLoop");
             }
@@ -472,6 +473,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             AbstractChannel.this.eventLoop = eventLoop;
 
+            //todo 判断当前线程在运行，调用register
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
@@ -479,6 +481,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
+                            //todo 线程池执行register
                             register0(promise);
                         }
                     });
@@ -493,6 +496,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
         }
 
+        //todo 执行channel的doRegister
         private void register0(ChannelPromise promise) {
             try {
                 // check if the channel is still open as it could be closed in the mean time when the register

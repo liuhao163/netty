@@ -29,6 +29,7 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  */
 public class DefaultChannelPromise extends DefaultPromise<Void> implements ChannelPromise, FlushCheckpoint {
 
+    //
     private final Channel channel;
     private long checkpoint;
 
@@ -47,6 +48,7 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
      *
      * @param channel
      *        the {@link Channel} associated with this future
+     *        todo channel的封装，里面有一个EventExecutor即NioEventLoop，和NioSocketChannel
      */
     public DefaultChannelPromise(Channel channel, EventExecutor executor) {
         super(executor);

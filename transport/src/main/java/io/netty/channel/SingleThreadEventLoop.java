@@ -71,12 +71,14 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
 
     @Override
     public ChannelFuture register(Channel channel) {
+        //todo channel的封装，里面有一个EventExecutor即NioEventLoop，和NioSocketChannel
         return register(new DefaultChannelPromise(channel, this));
     }
 
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
+        //todo call promise.channel->获取NioSocketChannel.unsafe().register(NioEvenLoop,promise)->call java nio的register方法
         promise.channel().unsafe().register(this, promise);
         return promise;
     }

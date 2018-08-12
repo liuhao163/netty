@@ -332,7 +332,12 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        //todo register
+        //todo register config().gourp()=bootstrap.NioEventGroupLoop.regiser(channel)
+        //todo 1、通过NioEventGroupLoop->MultithreadEventLoopGroup.next()方法获取NioEventLoop，
+        //todo 2、在通过NioEventLoop->SingleThreadEventExecutor.register()socket注册给selector
+        //todo 3、SingleThreadEventExecutor.register()方法new DefaultChannelPromise()调用regsiter(promise)方法
+        //todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise)方法调用java nio的api
+        //todo 5、unsafe().register的调用过程NioSocketChannelUnsafe-->AbstractUnsafe.register，调用AbstactChannel.doRegister()->AbstactNiOChannel.doRegister()
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {

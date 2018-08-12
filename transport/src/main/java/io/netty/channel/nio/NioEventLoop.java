@@ -136,6 +136,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private int cancelledKeys;
     private boolean needsToSelectAgain;
 
+    //继承了 AbstractExecutorService，所以
     NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
                  SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) {
         super(parent, executor, false, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler);
@@ -145,11 +146,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         if (strategy == null) {
             throw new NullPointerException("selectStrategy");
         }
-        provider = selectorProvider;
-        final SelectorTuple selectorTuple = openSelector();
-        selector = selectorTuple.selector;
-        unwrappedSelector = selectorTuple.unwrappedSelector;
-        selectStrategy = strategy;
+        provider = selectorProvider;//SelectorProvider.provider() java.nio
+        final SelectorTuple selectorTuple = openSelector();//是selector的封装类
+        selector = selectorTuple.selector;//获取selector
+        unwrappedSelector = selectorTuple.unwrappedSelector;//获取selector
+        selectStrategy = strategy;//DefaultSelectStrategy
     }
 
     private static final class SelectorTuple {
@@ -296,7 +297,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
 
         try {
-            ch.register(selector, interestOps, task);
+            ch.register(selector, interestOps, task);//todo call nio api将socketchannel
         } catch (Exception e) {
             throw new EventLoopException("failed to register a channel", e);
         }
