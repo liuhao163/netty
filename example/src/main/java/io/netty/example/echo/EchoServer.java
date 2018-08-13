@@ -48,6 +48,7 @@ public final class EchoServer {
             sslCtx = null;
         }
 
+        //todo明天开始读
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
