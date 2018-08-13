@@ -115,6 +115,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return ch;
     }
 
+    //todo 疑问？为什么这么麻烦呢，为什么不在AbstractNioChannel的构造方法中赋值NioEventLoop，从父类还要强转。
     @Override
     public NioEventLoop eventLoop() {
         return (NioEventLoop) super.eventLoop();
@@ -238,6 +239,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             return javaChannel();
         }
 
+        //todo caller=HeadContext
         @Override
         public final void connect(
                 final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) {
@@ -384,7 +386,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         boolean selected = false;
         for (;;) {
             try {
-                //todo 为什么不用readInterstOps呢。。 把NioSocketChannel，attrment进javaChannel中
+                //todo 为什么不用readInterstOps呢。。 把NioSocketChannel，把NioSocketChannelatt进javaChannel中
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {

@@ -166,6 +166,7 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
 
+        //如果channel注册成功
         if (regFuture.isDone()) {
             if (!regFuture.isSuccess()) {
                 return regFuture;
@@ -248,6 +249,17 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
         final Channel channel = connectPromise.channel();
+
+        /**
+         * todo NioSocketChannel.NioEventLoops.execute.异步链接的额逻辑
+         * todo channel.connect()->AbstractChannel.connect->pipeline.connect->tail.connect
+         * todo 重点：
+         * todo 1、查看tail.connect()中：findContextOutbound()-双向链表向前找到outbound为true的AbstractChannelHandlerContext即head
+         * todo 2、调用AbstractChannelHandlerContext的invokeConnect,这个时候因为是next调用所以handler返回HeadContext即：((ChannelOutboundHandler) handler()).connect(this, remoteAddress, localAddress, promise);
+         * todo     a、强转handler()实际上返回的this就是HeadContext转成ChannelOutboundHandler
+         * todo     b、调用的是HeadContext的connect()方法，这时候在new HeadContext时候已经有了unsafe即:AbstractNioUnsafe.conect()
+         * todo     c、AbstractNioUnsafe.conect()调用AbstractNioChannel->NioSocketChannel.doConnect()->最终调用java.nio见： SocketUtils.connect(javaChannel(), remoteAddress);完成链接
+         */
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
