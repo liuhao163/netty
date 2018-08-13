@@ -32,7 +32,8 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
     @SuppressWarnings("unchecked")
     @Override
     public EventExecutorChooser newChooser(EventExecutor[] executors) {
-        if (isPowerOfTwo(executors.length)) {//todo 在MultithreadEventExecutorGroup 中init一个ExecutorChooser调用next获取Excutor
+        //todo 在MultithreadEventExecutorGroup 中init一个ExecutorChooser调用next获取Excutor
+        if (isPowerOfTwo(executors.length)){
             return new PowerOfTwoEventExecutorChooser(executors);
         } else {
             return new GenericEventExecutorChooser(executors);
