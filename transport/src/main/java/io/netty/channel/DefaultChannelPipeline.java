@@ -1022,6 +1022,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelFuture connect(SocketAddress remoteAddress, ChannelPromise promise) {
+        //todo caller=abstractChannel
         return tail.connect(remoteAddress, promise);
     }
 
