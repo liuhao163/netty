@@ -130,7 +130,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * has a no-args constructor, its highly recommend to just use {@link #channel(Class)} to
      * simplify your code.
      */
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({"unchecked", "deprecation"})
     public B channelFactory(io.netty.channel.ChannelFactory<? extends C> channelFactory) {
         return channelFactory((ChannelFactory<C>) channelFactory);
     }
@@ -279,7 +279,15 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return doBind(localAddress);
     }
 
+    //todo 服务端开始bind
     private ChannelFuture doBind(final SocketAddress localAddress) {
+
+        /**
+         * todo 很类似客户端doResolveAndConnect方法，不过区别是，创建的是NioServerChannel.
+         * todo 1、NioServerSocketChannel.unsafe().register(NioEvenLoop,promise)
+         * todo 2、unsafe()方法返回NioMessageUnsafe-->AbstractUnsafe.register(),
+         * todo 3、最终的调用调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister(),註冊OP_ACCEPT事件
+         * */
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
@@ -335,12 +343,12 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         /**
          *
-            todo register config().gourp().rigister(channel)=bootstrap.NioEventGroupLoop.regiser(channel)
-            todo 1、通过NioEventGroupLoop->MultithreadEventLoopGroup.next()方法获取NioEventLoop，
-            todo 2、在通过NioEventLoop->SingleThreadEventExecutor.register()注册socket
-            todo 3、SingleThreadEventExecutor.register()实际上调用regsiter(promise)方法，即promise=new DefaultChannelPromise(channel)
-            todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise),调用过程：NioSocketChannelUnsafe-->AbstractUnsafe.register(),
-            todo 5，在AbstractUnsafe.register()中，关键点：AbstractChannel.this.eventLoop=NioEvenLoop,(给channel的eventloop赋值)，调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister()
+         todo register config().gourp().rigister(channel)=bootstrap.NioEventGroupLoop.regiser(channel)
+         todo 1、通过NioEventGroupLoop->MultithreadEventLoopGroup.next()方法获取NioEventLoop，
+         todo 2、在通过NioEventLoop->SingleThreadEventExecutor.register()注册socket
+         todo 3、SingleThreadEventExecutor.register()实际上调用regsiter(promise)方法，即promise=new DefaultChannelPromise(channel)
+         todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise),调用过程：NioSocketChannelUnsafe-->AbstractUnsafe.register(),
+         todo 5，在AbstractUnsafe.register()中，关键点：AbstractChannel.this.eventLoop=NioEvenLoop,(给channel的eventloop赋值)，调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister()
          */
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
@@ -452,14 +460,14 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
     static void setChannelOptions(
             Channel channel, Map<ChannelOption<?>, Object> options, InternalLogger logger) {
-        for (Map.Entry<ChannelOption<?>, Object> e: options.entrySet()) {
+        for (Map.Entry<ChannelOption<?>, Object> e : options.entrySet()) {
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
     }
 
     static void setChannelOptions(
             Channel channel, Map.Entry<ChannelOption<?>, Object>[] options, InternalLogger logger) {
-        for (Map.Entry<ChannelOption<?>, Object> e: options) {
+        for (Map.Entry<ChannelOption<?>, Object> e : options) {
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
     }
@@ -480,8 +488,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder()
-            .append(StringUtil.simpleClassName(this))
-            .append('(').append(config()).append(')');
+                .append(StringUtil.simpleClassName(this))
+                .append('(').append(config()).append(')');
         return buf.toString();
     }
 

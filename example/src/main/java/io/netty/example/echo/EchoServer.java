@@ -48,7 +48,7 @@ public final class EchoServer {
             sslCtx = null;
         }
 
-        //todo明天开始读
+        //todo 俩个EventLoopGroup 一个是boos处理链接对应的ServerBootstrap的parent，一个对应的是children
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
