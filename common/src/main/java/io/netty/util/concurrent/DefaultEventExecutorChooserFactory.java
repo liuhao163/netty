@@ -29,10 +29,16 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
 
     private DefaultEventExecutorChooserFactory() { }
 
+    /**
+     * //todo 在MultithreadEventExecutorGroup 中init一个ExecutorChooser调用next获取Excutor
+     * @param executors
+     * @return
+     */
     @SuppressWarnings("unchecked")
     @Override
     public EventExecutorChooser newChooser(EventExecutor[] executors) {
-        if (isPowerOfTwo(executors.length)) {//todo 在MultithreadEventExecutorGroup 中init一个ExecutorChooser调用next获取Excutor
+        //todo 判断数组的长度是不是2的幂即 1000000....入过是采用PowerOfTwoEventExecutorChooser的方式轮训数组提高性能
+        if (isPowerOfTwo(executors.length)) {
             return new PowerOfTwoEventExecutorChooser(executors);
         } else {
             return new GenericEventExecutorChooser(executors);
@@ -40,9 +46,18 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
     }
 
     private static boolean isPowerOfTwo(int val) {
+        /**
+         * todo 10禁止复数转2进制的规则是从左数第一位1的右边包括它不变，左边取反。
+         * todo "&"运算如果还等于原值，一定是2的幂，即 1，10，100，1000
+         */
         return (val & -val) == val;
     }
 
+    /**
+     * todo 按位运算效率高
+     * todo 因为excutors是2次幂所以idx.getAndIncrement() 和（excutors-1）"&"运算，等效于轮训数组。即
+     * todo i & 1111111...
+     */
     private static final class PowerOfTwoEventExecutorChooser implements EventExecutorChooser {
         private final AtomicInteger idx = new AtomicInteger();
         private final EventExecutor[] executors;
