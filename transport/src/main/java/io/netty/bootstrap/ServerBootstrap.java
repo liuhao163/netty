@@ -137,6 +137,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         return this;
     }
 
+    /**
+     * 改写了init方法
+     * @param channel
+     * @throws Exception
+     */
     @Override
     void init(Channel channel) throws Exception {
         final Map<ChannelOption<?>, Object> options = options0();
@@ -153,12 +158,15 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
         }
 
+        //todo NioSocketServerChannel
         ChannelPipeline p = channel.pipeline();
 
-        final EventLoopGroup currentChildGroup = childGroup;
-        final ChannelHandler currentChildHandler = childHandler;
+        final EventLoopGroup currentChildGroup = childGroup;//todo servergroup初始化时候传递进来的
+        final ChannelHandler currentChildHandler = childHandler;//todo servergroup中childhandler中初始化传递进来的
         final Entry<ChannelOption<?>, Object>[] currentChildOptions;
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs;
+
+        //todo 这俩是干嘛用的？？？
         synchronized (childOptions) {
             currentChildOptions = childOptions.entrySet().toArray(newOptionArray(0));
         }
@@ -166,10 +174,14 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
+        //todo 添加一个handler在pipline的尾端
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
+                /**
+                 * todo 调用Bootstrap.handler(handler)时候的handler，这里就是EchoServer中的ChannelInitializer即，ChannelInboundHandler
+                 */
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
                     pipeline.addLast(handler);

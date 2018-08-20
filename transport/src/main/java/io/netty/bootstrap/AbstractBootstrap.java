@@ -285,7 +285,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         /**
          * todo 很类似客户端doResolveAndConnect方法，不过区别是，创建的是NioServerChannel.
          * todo 1、NioServerSocketChannel.unsafe().register(NioEvenLoop,promise)
-         * todo 2、unsafe()方法返回NioMessageUnsafe-->AbstractUnsafe.register(),
+         * todo 2、unsafe()-->AbstractNioMessageChannel.newUnsafe()返回NioMessageUnsafe-->AbstractUnsafe.register(),同客户端
          * todo 3、最终的调用调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister(),註冊OP_ACCEPT事件
          * */
         final ChannelFuture regFuture = initAndRegister();
@@ -347,7 +347,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
          todo 1、通过NioEventGroupLoop->MultithreadEventLoopGroup.next()方法获取NioEventLoop，
          todo 2、在通过NioEventLoop->SingleThreadEventExecutor.register()注册socket
          todo 3、SingleThreadEventExecutor.register()实际上调用regsiter(promise)方法，即promise=new DefaultChannelPromise(channel)
-         todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise),调用过程：NioSocketChannelUnsafe-->AbstractUnsafe.register(),
+         todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise),调用过程：AbstractNioByteChannel.newUnsafe返回NioByteUnsafe-->AbstractUnsafe.register(),
          todo 5，在AbstractUnsafe.register()中，关键点：AbstractChannel.this.eventLoop=NioEvenLoop,(给channel的eventloop赋值)，调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister()
          */
         ChannelFuture regFuture = config().group().register(channel);
