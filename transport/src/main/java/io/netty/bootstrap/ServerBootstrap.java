@@ -174,7 +174,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        //todo 添加一个handler在pipline的尾端
+        //todo 添加一个handler在pipline的尾端,在group().register(ch)时候就会触发pipeline.fireChannelRegistered，会调用ChannelInitializer.channelRegistered
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
