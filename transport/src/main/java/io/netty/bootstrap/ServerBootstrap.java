@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link Bootstrap} sub-class which allows easy bootstrap of {@link ServerChannel}
- *
  */
 public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerChannel> {
 
@@ -50,7 +49,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     private volatile EventLoopGroup childGroup;
     private volatile ChannelHandler childHandler;
 
-    public ServerBootstrap() { }
+    public ServerBootstrap() {
+    }
 
     private ServerBootstrap(ServerBootstrap bootstrap) {
         super(bootstrap);
@@ -139,6 +139,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     /**
      * 改写了init方法
+     *
      * @param channel
      * @throws Exception
      */
@@ -151,7 +152,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         final Map<AttributeKey<?>, Object> attrs = attrs0();
         synchronized (attrs) {
-            for (Entry<AttributeKey<?>, Object> e: attrs.entrySet()) {
+            for (Entry<AttributeKey<?>, Object> e : attrs.entrySet()) {
                 @SuppressWarnings("unchecked")
                 AttributeKey<Object> key = (AttributeKey<Object>) e.getKey();
                 channel.attr(key).set(e.getValue());
@@ -174,7 +175,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        //todo 添加一个handler在pipline的尾端,在group().register(ch)时候就会触发pipeline.fireChannelRegistered，会调用ChannelInitializer.channelRegistered
+        /**
+         * todo 添加一个handler在pipline的尾端,在group().register(ch)时候就会触发pipeline.fireChannelRegistered(见AbstarctChannel中的register0方法)
+         * todo pipeline.fireChannelRegistered-->静态方法:AbstractChannelHandlerContext.invokeChannelRegistered,调用head的invokeChannelRegistered，即最中pipline中的channelRegistered方法。
+         * todo 也会传递调用ChannelInitializer.channelRegistered,在会调用initChannel,然后从pipline移除也会传递调用ChannelInitializer
+         * todo 在initChannel方法中会将，LoginHandler，ServerBootstrapAcceptor添加进来
+         */
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
@@ -187,6 +193,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                     pipeline.addLast(handler);
                 }
 
+                /**
+                 * todo ServerBootstrapAcceptor是一个ChannelInboundHandler,改写了channelRead方法
+                 * todo NioEventLoop监听到来自客户端建立好链接的Accept事件后调用NioMessageUnsafe.read（）-->NioServerSocket.doReadMessages()。
+                 * todo 详情见doReadMessages方法将NioServerSocketChannel和客户端的SocketChannel封装起来放入到buf中
+                 * todo unsafe中触发piepline.fireChannelRead 具体代码见NioMessageUnsafe.read方法。之后会调用ServerBootstrapAcceptor.channelRead方法
+                 * todo 为客户端的NioSocketChannel绑定childHandler和workGroup，具体代码见ServerBootstrapAcceptor.channelRead
+                 */
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -250,20 +263,27 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             };
         }
 
+        /**
+         * 关键方法
+         */
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            //todo 这个msg，就是readBuf中的NioSocketChannel,包括一个NioServerSocketChannel和客户端的ch
             final Channel child = (Channel) msg;
 
+            //todo 客户端初始化hildHandler，即Echo的childHandler,在ChannelInitializer下面的regsiter时候会触发fireChannleRegisterd
             child.pipeline().addLast(childHandler);
 
+            //todo 忽略
             setChannelOptions(child, childOptions, logger);
 
-            for (Entry<AttributeKey<?>, Object> e: childAttrs) {
+            for (Entry<AttributeKey<?>, Object> e : childAttrs) {
                 child.attr((AttributeKey<Object>) e.getKey()).set(e.getValue());
             }
 
             try {
+                //todo，为childGroup即workGroup绑定客户端的NioSocketChannel，具体见bootStrap中的registerAndinit方法
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
