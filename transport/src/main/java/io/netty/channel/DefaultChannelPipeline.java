@@ -94,10 +94,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
 
-        tail = new TailContext(this);
-        head = new HeadContext(this);
+        //todo 维护一个双向链表 tail和head都是ChannelHandler接口的实现,同时还都是AbstractChannelHandlerContext
+        tail = new TailContext(this);//channelInboundHandler
+        head = new HeadContext(this);//channelOutboundHandler
 
-        //todo 双向链表 做什么用的
         head.next = tail;
         tail.prev = head;
     }
@@ -118,6 +118,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     private AbstractChannelHandlerContext newContext(EventExecutorGroup group, String name, ChannelHandler handler) {
+        //todo 见DefaultChannelHandlerContext中构造方法的super() isInbound(handler), isOutbound(handler)
         return new DefaultChannelHandlerContext(this, childExecutor(group), name, handler);
     }
 
@@ -202,14 +203,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return addLast(null, name, handler);
     }
 
+    //todo 添加handler的关键代码
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
         synchronized (this) {
+            //todo 检查handler是否已经被添加过（内有share注解，同时add属性已经为true）
             checkMultiplicity(handler);
 
+            //todo 将handler封装成AbstractChannelHandlerContext group=null，filterName,Handler
             newCtx = newContext(group, filterName(name, handler), handler);
 
+            //todo 添加到pipline的双向链表中
             addLast0(newCtx);
 
             // If the registered is false it means that the channel was not registered on an eventloop yet.
@@ -237,6 +242,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return this;
     }
 
+    //todo 典型的双向链表插入
     private void addLast0(AbstractChannelHandlerContext newCtx) {
         AbstractChannelHandlerContext prev = tail.prev;
         newCtx.prev = prev;
@@ -857,6 +863,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRegistered() {
+        //静态方法,参数是head
         AbstractChannelHandlerContext.invokeChannelRegistered(head);
         return this;
     }
@@ -1268,7 +1275,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     // A special catch-all handler that handles both bytes and messages.
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
-        //todo ?????? mark inbound outbound 什麼意思
+        //todo inbound = true, outbound = false
         TailContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, TAIL_NAME, true, false);
             setAddComplete();
@@ -1333,6 +1340,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         private final Unsafe unsafe;
 
         HeadContext(DefaultChannelPipeline pipeline) {
+            //todo inbound = false, outbound = true
             super(pipeline, null, HEAD_NAME, false, true);
             unsafe = pipeline.channel().unsafe();
             setAddComplete();
@@ -1403,10 +1411,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             ctx.fireExceptionCaught(cause);
         }
 
+        /**
+         * todo 因为自己没有实现fireChannelRegistered，所以调用父类AbstractChannelHandlerContext的方法开始链表循环，
+         * todo 找到链表第一个inbound属性的Handler，调用他的channelRegistered
+         * @param ctx
+         * @throws Exception
+         */
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
             invokeHandlerAddedIfNeeded();
-            ctx.fireChannelRegistered();
+            ctx.fireChannelRegistered();//todo 调用自己的fireChannelRegistered即，父类的fireChannelRegistered
         }
 
         @Override

@@ -125,13 +125,21 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     @Override
     public ChannelHandlerContext fireChannelRegistered() {
+        //todo 开始遍历链表找到最后的不是Inbound的handler
         invokeChannelRegistered(findContextInbound());
         return this;
     }
 
+    /*
+        todo 遍历链表，调用顺序是
+        todo pipline.fireChannelRegistered->静态方法，AbstractChannelHandlerContext.invokeChannelRegistered(head)->head.channelRegistered(head)
+        todo ->AbstractChannelHandlerContext.fireChannelRegistered
+     */
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
+        //todo
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
+            //todo 这里invoke
             next.invokeChannelRegistered();
         } else {
             executor.execute(new Runnable() {
@@ -144,8 +152,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     private void invokeChannelRegistered() {
+        //todo check handler currnetState add_complete or (notorder and pedding)
         if (invokeHandler()) {
             try {
+                //todo 强转成inbound这里见head的Handler,返回是他自己
                 ((ChannelInboundHandler) handler()).channelRegistered(this);
             } catch (Throwable t) {
                 notifyHandlerException(t);
@@ -936,6 +946,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return false;
     }
 
+    //todo 查找第一个inbound=false的AbstractChannelHandlerContext
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;
         do {

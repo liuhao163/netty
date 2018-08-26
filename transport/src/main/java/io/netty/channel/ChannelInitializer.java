@@ -27,11 +27,11 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * A special {@link ChannelInboundHandler} which offers an easy way to initialize a {@link Channel} once it was
  * registered to its {@link EventLoop}.
- *
+ * <p>
  * Implementations are most often used in the context of {@link Bootstrap#handler(ChannelHandler)} ,
  * {@link ServerBootstrap#handler(ChannelHandler)} and {@link ServerBootstrap#childHandler(ChannelHandler)} to
  * setup the {@link ChannelPipeline} of a {@link Channel}.
- *
+ * <p>
  * <pre>
  *
  * public class MyChannelInitializer extends {@link ChannelInitializer} {
@@ -47,7 +47,7 @@ import java.util.concurrent.ConcurrentMap;
  * </pre>
  * Be aware that this class is marked as {@link Sharable} and so the implementation must be safe to be re-used.
  *
- * @param <C>   A sub-type of {@link Channel}
+ * @param <C> A sub-type of {@link Channel}
  */
 @Sharable
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
@@ -60,14 +60,22 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     /**
      * This method will be called once the {@link Channel} was registered. After the method returns this instance
      * will be removed from the {@link ChannelPipeline} of the {@link Channel}.
-     *
-     * @param ch            the {@link Channel} which was registered.
-     * @throws Exception    is thrown if an error occurs. In that case it will be handled by
-     *                      {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
-     *                      the {@link Channel}.
+     * todo 在改方法中对channel做一些操作。例如：添加新的hanler中，参数channel是pipline中的channel，
+     * @param ch the {@link Channel} which was registered.
+     * @throws Exception is thrown if an error occurs. In that case it will be handled by
+     *                   {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
+     *                   the {@link Channel}.
      */
     protected abstract void initChannel(C ch) throws Exception;
 
+    /**
+     * todo 在channel.register->pipline.fireChannelRegister->AbstractHandlerContext.invokeRegister(head)->
+     * todo head.fireChannelRegistered，即AbstractHandlerContext.fireChannelRegistered-->循环链表找到第一个inbound=true的DefaultChannelHandlerContext
+     * todo 即ChannelInitializer 调用他的channelRegistered
+     *
+     * @param ctx
+     * @throws Exception
+     */
     @Override
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -76,10 +84,10 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         if (initChannel(ctx)) {
             // we called initChannel(...) so we need to call now pipeline.fireChannelRegistered() to ensure we not
             // miss an event.
-            ctx.pipeline().fireChannelRegistered();
+            ctx.pipeline().fireChannelRegistered(); //todo 传递事件继续循环链表调用
         } else {
             // Called initChannel(...) before which is the expected behavior, so just forward the event.
-            ctx.fireChannelRegistered();
+            ctx.fireChannelRegistered();//todo 传递事件继续循环链表调用
         }
     }
 
@@ -108,6 +116,12 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         }
     }
 
+    /**
+     *  //todo initChannel实现的abstract方法，传递channel是为了便于将需要的handleraddLast中，并且最后将自己从链表中移除
+     * @param ctx
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
         if (initMap.putIfAbsent(ctx, Boolean.TRUE) == null) { // Guard against re-entrance.

@@ -349,6 +349,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
          todo 3、SingleThreadEventExecutor.register()实际上调用regsiter(promise)方法，即promise=new DefaultChannelPromise(channel)
          todo 4、在该方法中调用NioSocketChannel.unsafe().register(NioEvenLoop,promise),调用过程：AbstractNioByteChannel.newUnsafe返回NioByteUnsafe-->AbstractUnsafe.register(),
          todo 5，在AbstractUnsafe.register()中，关键点：AbstractChannel.this.eventLoop=NioEvenLoop,(给channel的eventloop赋值)，调用AbstactChannel.doRegister()->即：AbstractNioChannel.doRegister()
+         todo 6，doRegister后会调用pipeline.fireChannelRegistered() 方法，将handler添加到pipline中
          */
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
