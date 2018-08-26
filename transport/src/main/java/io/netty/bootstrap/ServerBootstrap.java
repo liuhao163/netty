@@ -186,7 +186,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
                 /**
-                 * todo 调用Bootstrap.handler(handler)时候的handler，这里就是EchoServer中的ChannelInitializer即，ChannelInboundHandler
+                 * todo 调用Bootstrap.handler(handler)时候的handler，这里就是EchoServer中的LogHandler
                  */
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
