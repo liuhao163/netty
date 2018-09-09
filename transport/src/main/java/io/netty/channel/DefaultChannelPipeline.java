@@ -1275,7 +1275,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     // A special catch-all handler that handles both bytes and messages.
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
-        //todo inbound = true, outbound = false
+        //todo inbound = true, outbound = false  Inound事件从head--->tail 这时候innbound=true跳出循环，事件传递终止
         TailContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, TAIL_NAME, true, false);
             setAddComplete();
@@ -1286,12 +1286,14 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             return this;
         }
 
+        //todo 事件传递终止不做任何操作
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) throws Exception { }
 
         @Override
         public void channelUnregistered(ChannelHandlerContext ctx) throws Exception { }
 
+        //todo 从head传递过来默认不做实现
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             onUnhandledInboundChannelActive();
@@ -1340,7 +1342,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         private final Unsafe unsafe;
 
         HeadContext(DefaultChannelPipeline pipeline) {
-            //todo inbound = false, outbound = true
+            //todo inbound = false, outbound = true Outbound事件从tail--->head 这时候outbound=true跳出循环，事件传递终止
             super(pipeline, null, HEAD_NAME, false, true);
             unsafe = pipeline.channel().unsafe();
             setAddComplete();

@@ -536,11 +536,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             return promise;
         }
 
-        //todo 双向链表向前找到outbound为true的AbstractChannelHandlerContext即head ? 为什么不上一个方法head.connect
+        //todo 双向链表向前找到outbound为true的AbstractChannelHandlerContext
         final AbstractChannelHandlerContext next = findContextOutbound();
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
-            //todo 调用Head的invokeConnect
+            //todo 调用Tail的invokeConnect
             next.invokeConnect(remoteAddress, localAddress, promise);
         } else {
             safeExecute(executor, new Runnable() {
@@ -955,6 +955,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return ctx;
     }
 
+    //todo 查找第一个outbound=false的AbstractChannelHandlerContext
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;
         do {

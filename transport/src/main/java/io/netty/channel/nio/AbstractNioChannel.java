@@ -239,7 +239,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             return javaChannel();
         }
 
-        //todo caller=HeadContext
+        //todo caller AbstactChannelHandlerContext.findContextOutbound方法传递到头部，调用invokeConnect中。head.connect
         @Override
         public final void connect(
                 final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) {
@@ -255,6 +255,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
                 boolean wasActive = isActive();
                 if (doConnect(remoteAddress, localAddress)) {
+                    //todo 触发inbound的channelactive事件
                     fulfillConnectPromise(promise, wasActive);
                 } else {
                     connectPromise = promise;
