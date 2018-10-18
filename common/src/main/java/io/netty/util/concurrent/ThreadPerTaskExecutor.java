@@ -28,8 +28,13 @@ public final class ThreadPerTaskExecutor implements Executor {
         this.threadFactory = threadFactory;
     }
 
+    /**
+     * override excute，每次excute时候调new一个thread
+     * @param command
+     */
     @Override
     public void execute(Runnable command) {
+        //todo DefaultThreadFactory
         threadFactory.newThread(command).start();
     }
 }

@@ -78,6 +78,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      * {@link Channel}'s.
      */
     public ServerBootstrap group(EventLoopGroup parentGroup, EventLoopGroup childGroup) {
+        //todo reactor模型，group=parentGroup,childGroup=childGroup
         super.group(parentGroup);
         if (childGroup == null) {
             throw new NullPointerException("childGroup");

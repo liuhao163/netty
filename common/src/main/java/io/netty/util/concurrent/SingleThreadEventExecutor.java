@@ -159,10 +159,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                                         boolean addTaskWakesUp, int maxPendingTasks,
                                         RejectedExecutionHandler rejectedHandler) {
         super(parent);
-        this.addTaskWakesUp = addTaskWakesUp;
+        this.addTaskWakesUp = addTaskWakesUp; //todo false
         this.maxPendingTasks = Math.max(16, maxPendingTasks);
-        this.executor = ObjectUtil.checkNotNull(executor, "executor");
-        taskQueue = newTaskQueue(this.maxPendingTasks);
+        this.executor = ObjectUtil.checkNotNull(executor, "executor");//todo ThreadPerTaskExecutor每次excute时候调new一个thread
+        taskQueue = newTaskQueue(this.maxPendingTasks);//todo LinkedBlockingQueue
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
     }
 
