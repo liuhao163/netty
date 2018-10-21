@@ -755,6 +755,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return isTerminated();
     }
 
+    //todo 关键方法在这里启动EventLoop的方法，比如在AbstarctChannle.unfase().register中，通过execute
     @Override
     public void execute(Runnable task) {
         if (task == null) {
@@ -764,6 +765,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         boolean inEventLoop = inEventLoop();
         addTask(task);
         if (!inEventLoop) {
+            //todo 启动eventloop线程
             startThread();
             if (isShutdown() && removeTask(task)) {
                 reject();
@@ -857,8 +859,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private void startThread() {
         if (state == ST_NOT_STARTED) {
+            //todo cas中通过判断状态启动服务
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 try {
+                    //todo 启动服务的关键方法
                     doStartThread();
                 } catch (Throwable cause) {
                     STATE_UPDATER.set(this, ST_NOT_STARTED);
@@ -881,6 +885,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 boolean success = false;
                 updateLastExecutionTime();
                 try {
+                    //todo 由于NioEventloop改写了run的方法所以这里调用的是NioEventLoop的run()方法
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {

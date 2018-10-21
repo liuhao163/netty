@@ -29,7 +29,7 @@ public final class ThreadPerTaskExecutor implements Executor {
     }
 
     /**
-     * override excute，每次excute时候调new一个thread
+     * override excute，每次excute时候调new一个thread(FastThreadLocalThread)
      * @param command
      */
     @Override

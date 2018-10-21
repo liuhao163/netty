@@ -472,6 +472,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            //todo 非常关键，完成了channel和eventLoop的绑定
             AbstractChannel.this.eventLoop = eventLoop;
 
             //todo 判断当前线程在运行，调用register
