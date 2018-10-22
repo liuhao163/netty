@@ -65,9 +65,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
+    //todo 该方法调用selector.selectNow()检查当前是否有就绪的IO事件, 如果有则返回就绪IO事件的个数; 如果没有, 则返回0.
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
         public int get() throws Exception {
+            //todo
             return selectNow();
         }
     };
@@ -400,14 +402,20 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /** todo 整个EventLoop的核心，SingleThreadEventExecutor.execute(Runable)-->startThread()-->doStartThread()-->run()[NioEventLoop]
+     *  todo execute（）在另一个线程死循环调用run
+     */
     @Override
     protected void run() {
+        //
         for (;;) {
             try {
+                //hasTasks?hasTasks ? selectSupplier.get() : SelectStrategy.SELECT
                 switch (selectStrategy.calculateStrategy(selectNowSupplier, hasTasks())) {
                     case SelectStrategy.CONTINUE:
                         continue;
                     case SelectStrategy.SELECT:
+                        //todo 处理逻辑
                         select(wakenUp.getAndSet(false));
 
                         // 'wakenUp.compareAndSet(false, true)' is always evaluated
@@ -715,6 +723,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return unwrappedSelector;
     }
 
+    /**
+     * todo 返回值是非阻塞的selector.selectNow()不阻塞当前线程，finally唤醒selector开始阻塞线程
+     * todo finally语句块中会检查 wakenUp 变量是否为 true, 当为 true 时, 调用 selector.wakeup() 唤醒 select() 的阻塞调用.
+     */
     int selectNow() throws IOException {
         try {
             return selector.selectNow();
