@@ -455,12 +455,20 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
                 cancelledKeys = 0;
                 needsToSelectAgain = false;
+                /**
+                 * todo ioRatio即io操作和task操作中的io操作占比：taskRatio=100-ioRatio
+                 * todo ioTime/ioRatio=taskTime/taskRatio
+                 * todo taskTime=(100-ioRatio)*ioTime/ioRatio
+                 */
                 final int ioRatio = this.ioRatio;
                 if (ioRatio == 100) {
+                    //todo 如果ioRatio是100,分别调用IO和TASK操作
                     try {
+                        //todo io操作
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
+                        //todo task操作
                         runAllTasks();
                     }
                 } else {
@@ -469,6 +477,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
+                        //todo 获取ioTime,然后通过计算的TaskTime来执行task任务，打到几本的精度
                         final long ioTime = System.nanoTime() - ioStartTime;
                         runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
@@ -537,6 +546,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return task;
     }
 
+    //todo mark
     private void processSelectedKeysPlain(Set<SelectionKey> selectedKeys) {
         // check if the set is empty and if so just return to not create garbage by
         // creating a new Iterator every time even if there is nothing to process.
@@ -738,6 +748,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * todo 如果没有任务时候堵塞进程
+     */
     private void select(boolean oldWakenUp) throws IOException {
         Selector selector = this.selector;
         try {
@@ -765,6 +778,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
+                //todo 阻塞线程timeoutMillis
                 int selectedKeys = selector.select(timeoutMillis);
                 selectCnt ++;
 
