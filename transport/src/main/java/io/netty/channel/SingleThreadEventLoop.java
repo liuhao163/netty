@@ -135,6 +135,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         return !(task instanceof NonWakeupRunnable);
     }
 
+    //todo 把对列中的任务在实行完,这里是指tailtask里的任务
     @Override
     protected void afterRunningAllTasks() {
         runAllTasksFrom(tailTasks);

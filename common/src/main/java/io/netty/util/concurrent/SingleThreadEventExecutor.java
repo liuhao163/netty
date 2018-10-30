@@ -388,25 +388,32 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     /**
      * Poll all tasks from the task queue and run them via {@link Runnable#run()} method.  This method stops running
      * the tasks in the task queue and returns if it ran longer than {@code timeoutNanos}.
+     * todo 根据io进度计算task时间来执行task
      */
     protected boolean runAllTasks(long timeoutNanos) {
         fetchFromScheduledTaskQueue();
+
+        //todo 从taskQueue队列中pull task
         Runnable task = pollTask();
         if (task == null) {
+            //todo 把对列中的任务在实行完,这里是指tailtask里的任务
             afterRunningAllTasks();
             return false;
         }
 
+        //todo deadline=currentNano-Start_TIME+timeoutnano
         final long deadline = ScheduledFutureTask.nanoTime() + timeoutNanos;
         long runTasks = 0;
         long lastExecutionTime;
         for (;;) {
+            //todo 执行task
             safeExecute(task);
 
             runTasks ++;
 
             // Check timeout every 64 tasks because nanoTime() is relatively expensive.
             // XXX: Hard-coded value - will make it configurable if it is really a problem.
+            //todo 每64次任务检查下过期时间，如果上一次执行时间大于deadline，到了taskTime的阈值，break结束
             if ((runTasks & 0x3F) == 0) {
                 lastExecutionTime = ScheduledFutureTask.nanoTime();
                 if (lastExecutionTime >= deadline) {
@@ -414,6 +421,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 }
             }
 
+            //todo 从taskQueue获取task如果为空，更新上一次的结束时间，break结束
             task = pollTask();
             if (task == null) {
                 lastExecutionTime = ScheduledFutureTask.nanoTime();
@@ -421,6 +429,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             }
         }
 
+        //todo 把对列中的任务在实行完,这里是指tailtask里的任务
         afterRunningAllTasks();
         this.lastExecutionTime = lastExecutionTime;
         return true;
