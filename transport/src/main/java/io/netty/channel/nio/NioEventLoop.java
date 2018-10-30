@@ -209,6 +209,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         final Class<?> selectorImplClass = (Class<?>) maybeSelectorImplClass;
         final SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();
 
+        //??? todo???
         Object maybeException = AccessController.doPrivileged(new PrivilegedAction<Object>() {
             @Override
             public Object run() {
@@ -477,7 +478,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
-                        //todo 获取ioTime,然后通过计算的TaskTime来执行task任务，打到几本的精度
+                        //todo 获取ioTime,然后通过计算的TaskTime来执行task任务，打到基本的精度
                         final long ioTime = System.nanoTime() - ioStartTime;
                         runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
@@ -512,6 +513,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private void processSelectedKeys() {
+        //todo 这个后面在看应该和操作系统相关
         if (selectedKeys != null) {
             processSelectedKeysOptimized();
         } else {
@@ -588,6 +590,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private void processSelectedKeysOptimized() {
+        //todo 遍历selectedKeys
         for (int i = 0; i < selectedKeys.size; ++i) {
             final SelectionKey k = selectedKeys.keys[i];
             // null out entry in the array to allow to have it GC'ed once the Channel close
@@ -596,6 +599,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
             final Object a = k.attachment();
 
+            //todo 如果是AbstractNioChannel类型，见restger流程中AbstractNioChannel中的doRegister方法
             if (a instanceof AbstractNioChannel) {
                 processSelectedKey(k, (AbstractNioChannel) a);
             } else {
@@ -639,10 +643,12 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             return;
         }
 
+        //todo 关键代码
         try {
             int readyOps = k.readyOps();
             // We first need to call finishConnect() before try to trigger a read(...) or write(...) as otherwise
             // the NIO JDK channel implementation may throw a NotYetConnectedException.
+            //todo 如果时间类型是OP_CONNECT，将OP_CONNECT从k.interestOps中移除
             if ((readyOps & SelectionKey.OP_CONNECT) != 0) {
                 // remove OP_CONNECT as otherwise Selector.select(..) will always return without blocking
                 // See https://github.com/netty/netty/issues/924
@@ -654,6 +660,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             }
 
             // Process OP_WRITE first as we may be able to write some queued buffers and so free memory.
+            // todo 处理写的逻辑
             if ((readyOps & SelectionKey.OP_WRITE) != 0) {
                 // Call forceFlush which will also take care of clear the OP_WRITE once there is nothing left to write
                 ch.unsafe().forceFlush();
@@ -661,6 +668,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
+            //todo 处理读OP_READ、OP_ACCEPT、0（register时候的事件）
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
                 unsafe.read();
             }
