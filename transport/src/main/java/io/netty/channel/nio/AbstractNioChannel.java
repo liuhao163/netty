@@ -387,7 +387,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         boolean selected = false;
         for (;;) {
             try {
-                //todo 为什么不用readInterstOps呢。。 把NioSocketChannel，把NioSocketChannelatt进javaChannel中
+                //todo 这个参数表示注册到Selector上的 Channel所感兴趣的IO事件, 传入0的话,就说明仅仅将Channel注册到Selector中, 但是不设置interestSet.
+                //todo 把NioSocketChannel，把NioSocketChannelatt进javaChannel中
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {
