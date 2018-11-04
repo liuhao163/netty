@@ -475,7 +475,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             //todo 非常关键，完成了channel和eventLoop的绑定
             AbstractChannel.this.eventLoop = eventLoop;
 
-            //todo 判断当前线程在运行，调用register
+            //todo 判断当前线程在运行，调用register，直接执行，否则放在队列中异步执行
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
@@ -515,6 +515,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // user may already fire events through the pipeline in the ChannelFutureListener.
                 pipeline.invokeHandlerAddedIfNeeded();
 
+                //todo 为promis社会完成
                 safeSetSuccess(promise);
                 //todo channelRegisterd事件
                 pipeline.fireChannelRegistered();

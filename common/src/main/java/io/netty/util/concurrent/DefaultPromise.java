@@ -100,6 +100,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     @Override
     public boolean trySuccess(V result) {
         if (setSuccess0(result)) {
+            // todo 设置成功后通知所有的listeners
             notifyListeners();
             return true;
         }
@@ -135,7 +136,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     @Override
     public boolean isSuccess() {
-        Object result = this.result;
+            Object result = this.result;
         return result != null && result != UNCANCELLABLE && !(result instanceof CauseHolder);
     }
 
