@@ -294,6 +294,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return regFuture;
         }
 
+        // todo regFuture是个DefaultChannelPromise,如果已经完成直接调用doBind。如果没完成，用Listerner方法调用doBind
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
